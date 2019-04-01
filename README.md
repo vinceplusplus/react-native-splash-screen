@@ -1,7 +1,7 @@
 # react-native-splash-screen
 
 
-[![Download](https://img.shields.io/badge/Download-v3.1.1-ff69b4.svg) ](https://www.npmjs.com/package/react-native-splash-screen)
+[![Download](https://img.shields.io/badge/Download-v3.2.0-ff69b4.svg) ](https://www.npmjs.com/package/react-native-splash-screen)
 [ ![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen.svg)](https://github.com/crazycodeboy/react-native-splash-screen/pulls)
 [ ![react-native-splash-screen release](https://img.shields.io/github/release/crazycodeboy/react-native-splash-screen.svg?maxAge=2592000?style=flat-square)](https://github.com/crazycodeboy/GitHubPopular/releases)
 [ ![语言 中文](https://img.shields.io/badge/语言-中文-feb252.svg)](https://github.com/crazycodeboy/react-native-splash-screen/blob/master/README.zh.md)
@@ -12,13 +12,15 @@ A splash screen API for react-native which can programatically hide and show the
 
 ## Content
 
+- [Changes](#changes)
 - [Installation](#installation)
 - [Examples](#examples)
 - [Getting started](#getting-started)
 - [API](#api)
 - [Testing](#testing)
+- [Troubleshooting](#troubleshooting)
 - [Contribution](#contribution)
-- [Changes](#changes)
+
 
 ## Changes
 For React Native >= 0.47.0 use [v3.+](https://github.com/crazycodeboy/react-native-splash-screen/releases), for React Native < 0.47.0 use [v2.1.0](https://github.com/crazycodeboy/react-native-splash-screen/releases/tag/v1.0.9)
@@ -58,7 +60,7 @@ project(':react-native-splash-screen').projectDir = new File(rootProject.project
 ...
 dependencies {
     ...
-    compile project(':react-native-splash-screen')
+    implementation project(':react-native-splash-screen')
 }
 ```
 
@@ -148,6 +150,8 @@ Update `AppDelegate.m` with the following additions:
     // ...other code
 
     [RNSplashScreen show];  // here
+    // or
+    //[RNSplashScreen showSplash:@"LaunchScreen" inRootView:rootView];
     return YES;
 }
 
@@ -167,11 +171,11 @@ Create a file called `launch_screen.xml` in `app/src/main/res/layout` (create th
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/launch_screen">
-</LinearLayout>
+    android:layout_height="match_parent">
+    <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/launch_screen" android:scaleType="centerCrop" />
+</RelativeLayout>
 ```
 
 Customize your launch screen by creating a `launch_screen.png`-file and placing it in an appropriate `drawable`-folder. Android automatically scales drawable, so you do not necessarily need to provide images for all phone densities.
@@ -281,6 +285,28 @@ export default {
   show: jest.fn().mockImplementation( () => { console.log('show splash screen'); } ),
   hide: jest.fn().mockImplementation( () => { console.log('hide splash screen'); } ),
 }
+```
+
+## Troubleshooting 
+
+### Splash screen always appears stretched/distorted
+Add the ImageView with a scaleType in the `launch_screen.xml`, e.g.:
+```
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical"
+>
+  <ImageView 
+    android:src="@drawable/launch_screen"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scaleType="centerCrop"
+  >
+  </ImageView>
+</FrameLayout>
 ```
 
 ## Contribution

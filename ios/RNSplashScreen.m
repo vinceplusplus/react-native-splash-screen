@@ -13,6 +13,7 @@
 static bool waiting = true;
 static bool addedJsLoadErrorObserver = false;
 static UIView* loadingView = nil;
+static UIViewController *loadingViewController = nil;
 
 @implementation RNSplashScreen
 - (dispatch_queue_t)methodQueue{
@@ -44,16 +45,68 @@ RCT_EXPORT_MODULE(SplashScreen)
     [rootView addSubview:loadingView];
 }
 
++ (void)showSplashViewController:(UIViewController *)splashViewController inRootViewController:(UIViewController *)rootViewController {
+   if (loadingViewController != nil) {
+      return;
+   }
+   loadingViewController = splashViewController;
+   waiting = false;
+   
+   [rootViewController addChildViewController:splashViewController];
+   loadingViewController.view.translatesAutoresizingMaskIntoConstraints = false;
+   [rootViewController.view addSubview:loadingViewController.view];
+   UIView *loadingView = loadingViewController.view;
+   UIView *rootView = rootViewController.view;
+   [rootView addConstraint:[NSLayoutConstraint
+                            constraintWithItem:loadingView
+                            attribute:NSLayoutAttributeLeading
+                            relatedBy:NSLayoutRelationEqual
+                            toItem:rootView
+                            attribute:NSLayoutAttributeLeading
+                            multiplier:1 constant:0]];
+   [rootView addConstraint:[NSLayoutConstraint
+                            constraintWithItem:loadingView
+                            attribute:NSLayoutAttributeTrailing
+                            relatedBy:NSLayoutRelationEqual
+                            toItem:rootView
+                            attribute:NSLayoutAttributeTrailing
+                            multiplier:1 constant:0]];
+   [rootView addConstraint:[NSLayoutConstraint
+                            constraintWithItem:loadingView
+                            attribute:NSLayoutAttributeTop
+                            relatedBy:NSLayoutRelationEqual
+                            toItem:rootView
+                            attribute:NSLayoutAttributeTop
+                            multiplier:1 constant:0]];
+   [rootView addConstraint:[NSLayoutConstraint
+                            constraintWithItem:loadingView
+                            attribute:NSLayoutAttributeBottom
+                            relatedBy:NSLayoutRelationEqual
+                            toItem:rootView
+                            attribute:NSLayoutAttributeBottom
+                            multiplier:1 constant:0]];
+   [loadingViewController didMoveToParentViewController:rootViewController];
+}
+
 + (void)hide {
-    if (waiting) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            waiting = false;
-        });
-    } else {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+   if (waiting) {
+      dispatch_async(dispatch_get_main_queue(), ^{
+         waiting = false;
+      });
+   } else {
+      if (loadingView != nil) {
+         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             [loadingView removeFromSuperview];
-        });
-    }
+         });
+      }
+      else {
+         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [loadingViewController willMoveToParentViewController:nil];
+            [loadingViewController.view removeFromSuperview];
+            [loadingViewController removeFromParentViewController];
+         });
+      }
+   }
 }
 
 + (void) jsLoadError:(NSNotification*)notification
